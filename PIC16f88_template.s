@@ -30,7 +30,7 @@ WAIT10	EQU 0x22
 WAIT100	EQU 0x23	
 WAIT1k	EQU 0x24
 	
-ADCTEMP	EQU 0x31	;variables used to point to memory stores for the readadc routines
+;variables used to point to memory stores for the readadc routines
 ADC0	EQU 0x32
 	
 ;================================== RESET & INTERRUPT VECTORS  =============================	
@@ -111,7 +111,7 @@ loopadc0:
 	clrwdt		    ;Pat the watchdog
 	btfsc ADCON0,2	    ;check if conversion finished
 	goto loopadc0
-	movf ADRESH,w	    ;take result from ADRESH
+	movf ADRESH,0x00	    ;take result from ADRESH
 	movwf ADC0	    ;move result to ADC0
 	return
 
