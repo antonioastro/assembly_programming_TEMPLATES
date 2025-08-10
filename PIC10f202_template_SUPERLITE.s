@@ -1,3 +1,7 @@
+;Template created by ANTONIO COULTON
+;Email: acelectronics@murena.io
+;Last updated August 2025
+
 PROCESSOR 10F202 ;tell the software which chip is used.
    
     CONFIG  WDTE = OFF            ; Watchdog Timer (WDT disabled)
