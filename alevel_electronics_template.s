@@ -7,10 +7,9 @@
 ;	DATE: #######EXAM SERIES HERE (eg Summer 2024)#######
 
 ;============================= TEMPLATE INFORMATION ============================
-;TEMPLATE CREATED BY ANTONIO COULTON, Dr JOSEPH DARE
-;Lecturers, A-level Electronics and Physics
+;TEMPLATE CREATED BY ANTONIO COULTON
+;Lecturer, A-level Electronics and Physics
 ;Email: acelectronics@murena.io
-;Last updated June 2025
 
 ;adapted from Eduqas Template for A-level Electronics
     ;https://www.eduqas.co.uk/qualifications/electronics-as-a-level/#tab_keydocuments
@@ -48,16 +47,10 @@ WAIT10	EQU 0x22
 WAIT100	EQU 0x23	
 WAIT1k	EQU 0x24
 	
-ADCTEMP	EQU 0x31	;variables used to point to memory stores for the readadc routines
+;variables used to point to memory stores for the readadc routines
 ADC0	EQU 0x32
 ADC1	EQU 0x33
 ADC2	EQU 0x34
-
-;=============================== VARIABLES USED ================================
-RPZERO	EQU 0x05	;refers to bit RP0 in the STATUS Register
-INTFL	EQU 0x01	;interrupt 0 flag - INT0IF in INTCON
-INTEN	EQU 0x04	;interrupt 0 enable - INT0IE in INTCON
-GI	EQU 0x07	;global interrupt enable - GIE in INTCON
 	
 ;======================= RESET AND INTERRUPT VECTORS  ==========================
 psect RES_VECT,class=CODE,delta=2 ; PIC10/12/16
@@ -68,10 +61,10 @@ RES_VECT:
 PSECT INT_VECT,class=CODE,delta=2
 INT_VECT:
     movwf CLONE		    ;create a copy of the current working register
-    btfss INTCON,INTFL	    ;check interrupt has occured, skips if true
+    btfss INTCON,1	    ;check interrupt has occured, skips if true
     retfie		    ;set GI and RETURN in a single clock cycle
     call your_interrupt
-    bcf INTCON,INTFL	    ;reset the interrupt flag
+    bcf INTCON,1	    ;reset the interrupt flag
     movf CLONE,0x00	    ;return the saved working register back for use (working register address 0x00)
     retfie
 
@@ -129,9 +122,9 @@ loop1000ms:
 ;================================= read adc ====================================
 readadc0:
 	movlw 00000001B	    ;PORTA,0
-	bsf STATUS,RPZERO
+	bsf STATUS,5
 	movwf ANSEL
-	bcf STATUS,RPZERO
+	bcf STATUS,5
 	movlw 01000001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check
 	movwf ADCON0
 	bsf ADCON0,2	    ;start adc conversion
@@ -139,15 +132,15 @@ loopadc0:
 	clrwdt		    ;Pat the watchdog
 	btfsc ADCON0,2	    ;check if conversion finished
 	goto loopadc0
-	movf ADRESH,w	    ;take result from ADRESH
+	movf ADRESH,0x00	    ;take result from ADRESH
 	movwf ADC0	    ;move result to ADC0
 	return
 
 readadc1:
 	movlw 00000010B	    ;PORTA,1
-	bsf STATUS,RPZERO
+	bsf STATUS,5
 	movwf ANSEL
-	bcf STATUS,RPZERO
+	bcf STATUS,5
 	movlw 01001001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check 
 	movwf ADCON0
 	bsf ADCON0,2	    ;start adc conversion
@@ -155,15 +148,15 @@ loopadc1:
 	clrwdt		    ;Pat the watchdog
 	btfsc ADCON0,2	    ;check if conversion finished
 	goto loopadc1
-	movf ADRESH,w
+	movf ADRESH,0x00
 	movwf ADC1
 	return
 	
 readadc2:
 	movlw 00000100B	    ;PORTA,2
-	bsf STATUS,RPZERO
+	bsf STATUS,5
 	movwf ANSEL
-	bcf STATUS,RPZERO
+	bcf STATUS,5
 	movlw 01010001B	    ;01XXX001, three blank bits tell ADCON0 which analog input to check 
 	movwf ADCON0
 	bsf ADCON0,2	    ;start adc conversion
@@ -171,7 +164,7 @@ loopadc2:
 	clrwdt		    ;Pat the watchdog
 	btfsc ADCON0,2	    ;check if conversion finished
 	goto loopadc2
-	movf ADRESH,w
+	movf ADRESH,0x00
 	movwf ADC2
 	return
 	
@@ -186,7 +179,7 @@ loopadc2:
 start:
     clrf PORTA
     clrf PORTB
-    bsf STATUS,RPZERO	;change RP0 to 1 to select BANK1
+    bsf STATUS,5	;change RP0 to 1 to select BANK1
     movlw 01100000B	;set the clock speed to 4MHz
     movwf OSCCON 	;move the new clock speed to the clock controller.	
     clrf ANSEL		;disable adc
@@ -196,13 +189,13 @@ start:
     movwf TRISB		
     movlw 00000000B	;Vref is power supply voltage & left justified
     movwf ADCON1	;configured ready to use readadc subroutines
-    bcf STATUS,RPZERO	;change RP0 to 0 to select BANK0
+    bcf STATUS,5	;change RP0 to 0 to select BANK0
     
 ;******************************** ENABLE INTERRUPTS ****************************
 ;Uncomment the next 2 lines to enable interrupt routines by removing the FIRST semicolon (;)
 
-    ;bsf INTCON,INTEN	;set the external interrupt enable
-    ;bsf INTCON,GI		;enable all interruptions
+    ;bsf INTCON,4	;set the external interrupt enable
+    ;bsf INTCON,7		;enable all interruptions
     
 main:
 ;******************************* MAIN PROGRAMME ********************************
