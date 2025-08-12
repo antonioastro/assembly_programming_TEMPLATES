@@ -65,11 +65,11 @@ loop1000ms:
 	goto loop1000ms	;+2*9
 	return		;+2 = 1,003,052
 
-readadc2:
-	bsf ADCON0,6	;bits 6 and 7 inform the microcontroller which AN pin to check.
-	bcf ADCON0,7	;this configuration enables AN2/GP2
+readadc0:
+	movlw 11000001
+	movwf ADCON0
 	bsf ADCON0,1	;start adc conversion
-loopadc2:
+loopadc0:
 	clrwdt		    ;Pat the watchdog
 	btfsc ADCON0,1	    ;check if conversion finished
 	goto loopadc0
